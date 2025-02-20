@@ -2,13 +2,30 @@ package main
 
 import (
 	"chirpy/api"
+	"chirpy/internal/database"
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"sync/atomic"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	cfg := api.ApiConfig{FileserverHits: atomic.Int32{}}
+
+	dbURL := os.Getenv("DB_URL")
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal("failed to connect to db")
+	}
+	dbQueries := database.New(db)
+
+	cfg := api.ApiConfig{
+		FileserverHits: atomic.Int32{},
+		Db:             dbQueries,
+	}
 
 	mux := http.NewServeMux()
 	mux.Handle("/app/", cfg.MiddlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(".")))))
@@ -22,7 +39,7 @@ func main() {
 		Addr:    ":8080",
 	}
 
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
 		fmt.Println(err)
 	}

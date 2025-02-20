@@ -1,6 +1,7 @@
 package api
 
 import (
+	"chirpy/internal/database"
 	"fmt"
 	"net/http"
 	"sync/atomic"
@@ -8,6 +9,7 @@ import (
 
 type ApiConfig struct {
 	FileserverHits atomic.Int32
+	Db             *database.Queries
 }
 
 func (cfg *ApiConfig) HandlerMetrics(w http.ResponseWriter, r *http.Request) {
