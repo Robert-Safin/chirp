@@ -1,31 +1,41 @@
 package api
 
 import (
+	"chirpy/internal/database"
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"slices"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 )
 
-func ValidateChirp(w http.ResponseWriter, r *http.Request) {
-	type requestJsonContents struct {
-		Body string `json:"body"`
+func CreateChirp(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
+	type requestBody struct {
+		Body    string    `json:"body"`
+		User_id uuid.UUID `json:"user_id"`
 	}
 
 	type responseSuccess struct {
-		Cleaned_body string `json:"cleaned_body"`
+		Id         uuid.UUID `json:"id"`
+		Created_at time.Time `json:"created_at"`
+		Updated_at time.Time `json:"updated_at"`
+		Body       string    `json:"body"`
+		User_id    string    `json:"user_id"`
 	}
 
-	params := requestJsonContents{}
+	params := requestBody{}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&params)
 
 	if err != nil {
-		RespondError(w, 500, "Something went wrong")
+		RespondError(w, 500, fmt.Sprintf("something went wrong %v", err))
 		return
 	}
-
 	if len(params.Body) > 140 {
 		RespondError(w, 400, "Chirp is too long")
 		return
@@ -42,8 +52,21 @@ func ValidateChirp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	RespondOK(w, 200, responseSuccess{Cleaned_body: strings.Join(clean_body, " ")})
+	chirp, err := cfg.Db.CreateChirp(context.Background(), database.CreateChirpParams{
+		Body:   strings.Join(clean_body, " "),
+		UserID: params.User_id,
+	})
 
-	return
+	if err != nil {
+		RespondError(w, 500, fmt.Sprintf("Error creatin chirp: %v", err))
+		return
+	}
 
+	RespondOK(w, 201, responseSuccess{
+		Id:         chirp.ID,
+		Created_at: chirp.CreatedAt,
+		Updated_at: chirp.UpdatedAt,
+		Body:       chirp.Body,
+		User_id:    uuid.UUID.String(chirp.UserID),
+	})
 }
