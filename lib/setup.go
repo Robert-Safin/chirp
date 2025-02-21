@@ -16,6 +16,7 @@ func SetUp() *api.ApiConfig {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	JwtSecret := os.Getenv("GetenvJWT_SECRET")
 	dbURL := os.Getenv("DB_URL")
 	platoform := os.Getenv("PLATFORM")
 	db, err := sql.Open("postgres", dbURL)
@@ -28,6 +29,7 @@ func SetUp() *api.ApiConfig {
 		FileserverHits: atomic.Int32{},
 		Db:             dbQueries,
 		Platform:       platoform,
+		JwtSecret:      JwtSecret,
 	}
 
 	return &cfg

@@ -12,6 +12,7 @@ type ApiConfig struct {
 	FileserverHits atomic.Int32
 	Db             *database.Queries
 	Platform       string
+	JwtSecret      string
 }
 
 func (cfg *ApiConfig) HandlerMetrics(w http.ResponseWriter, r *http.Request) {
@@ -33,12 +34,6 @@ func (cfg *ApiConfig) MiddlewareMetricsInc(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
-// func (cfg *ApiConfig) HandlerReset(w http.ResponseWriter, r *http.Request) {
-// 	cfg.FileserverHits.Store(0)
-// 	w.WriteHeader(http.StatusOK)
-// 	w.Write([]byte("Hits reset to 0"))
-// }
 
 func HandlerWithConfig(cfg *ApiConfig, handler func(*ApiConfig, http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
