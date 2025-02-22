@@ -19,6 +19,7 @@ func SetUp() *api.ApiConfig {
 	JwtSecret := os.Getenv("GetenvJWT_SECRET")
 	dbURL := os.Getenv("DB_URL")
 	platoform := os.Getenv("PLATFORM")
+	polka := os.Getenv("POLKA_KEY")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal("failed to connect to db")
@@ -30,6 +31,7 @@ func SetUp() *api.ApiConfig {
 		Db:             dbQueries,
 		Platform:       platoform,
 		JwtSecret:      JwtSecret,
+		Polka:          polka,
 	}
 
 	return &cfg

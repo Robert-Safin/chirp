@@ -13,6 +13,7 @@ type ApiConfig struct {
 	Db             *database.Queries
 	Platform       string
 	JwtSecret      string
+	Polka          string
 }
 
 func (cfg *ApiConfig) HandlerMetrics(w http.ResponseWriter, r *http.Request) {

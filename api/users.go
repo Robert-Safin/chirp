@@ -19,10 +19,11 @@ func CreateUser(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	}
 
 	type responseSuccess struct {
-		Id         uuid.UUID `json:"id"`
-		Created_at time.Time `json:"created_at"`
-		Updated_at time.Time `json:"updated_at"`
-		Email      string    `json:"email"`
+		Id            uuid.UUID `json:"id"`
+		Created_at    time.Time `json:"created_at"`
+		Updated_at    time.Time `json:"updated_at"`
+		Email         string    `json:"email"`
+		Is_chirpy_red bool      `json:"is_chirpy_red"`
 	}
 
 	params := requestBody{}
@@ -52,10 +53,11 @@ func CreateUser(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondOK(w, 201, responseSuccess{
-		Id:         user.ID,
-		Created_at: user.CreatedAt,
-		Updated_at: user.UpdatedAt,
-		Email:      user.Email,
+		Id:            user.ID,
+		Created_at:    user.CreatedAt,
+		Updated_at:    user.UpdatedAt,
+		Email:         user.Email,
+		Is_chirpy_red: user.IsChirpyRed,
 	})
 
 }
@@ -67,12 +69,13 @@ func Login(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	}
 
 	type responseSuccess struct {
-		Id           uuid.UUID `json:"id"`
-		Created_at   time.Time `json:"created_at"`
-		Updated_at   time.Time `json:"updated_at"`
-		Email        string    `json:"email"`
-		Token        string    `json:"token"`
-		RefreshToken string    `json:"refresh_token"`
+		Id            uuid.UUID `json:"id"`
+		Created_at    time.Time `json:"created_at"`
+		Updated_at    time.Time `json:"updated_at"`
+		Email         string    `json:"email"`
+		Token         string    `json:"token"`
+		RefreshToken  string    `json:"refresh_token"`
+		Is_chirpy_red bool      `json:"is_chirpy_red"`
 	}
 
 	params := body{}
@@ -122,12 +125,13 @@ func Login(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondOK(w, 200, responseSuccess{
-		Id:           user.ID,
-		Created_at:   user.CreatedAt,
-		Updated_at:   user.UpdatedAt,
-		Email:        user.Email,
-		Token:        token,
-		RefreshToken: refresh_token.Token,
+		Id:            user.ID,
+		Created_at:    user.CreatedAt,
+		Updated_at:    user.UpdatedAt,
+		Email:         user.Email,
+		Token:         token,
+		RefreshToken:  refresh_token.Token,
+		Is_chirpy_red: user.IsChirpyRed,
 	})
 }
 
@@ -187,15 +191,17 @@ func Revoke(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
+
 	type body struct {
 		Password string `json:"password"`
 		Email    string `json:"email"`
 	}
 	type response struct {
-		Id         uuid.UUID `json:"id"`
-		Created_at time.Time `json:"created_at"`
-		Updated_at time.Time `json:"updates_at"`
-		Email      string    `json:"email"`
+		Id            uuid.UUID `json:"id"`
+		Created_at    time.Time `json:"created_at"`
+		Updated_at    time.Time `json:"updates_at"`
+		Email         string    `json:"email"`
+		Is_chirpy_red bool      `json:"is_chirpy_red"`
 	}
 	h, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -234,9 +240,10 @@ func UpdateUser(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondOK(w, 200, response{
-		Id:         user.ID,
-		Created_at: user.CreatedAt,
-		Updated_at: user.UpdatedAt,
-		Email:      user.Email,
+		Id:            user.ID,
+		Created_at:    user.CreatedAt,
+		Updated_at:    user.UpdatedAt,
+		Email:         user.Email,
+		Is_chirpy_red: user.IsChirpyRed,
 	})
 }

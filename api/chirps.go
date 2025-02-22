@@ -16,8 +16,7 @@ import (
 
 func CreateChirp(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	type requestBody struct {
-		Body string `json:"body"`
-		// User_id uuid.UUID `json:"user_id"`
+		Body  string `json:"body"`
 		Token string `json:"token"`
 	}
 

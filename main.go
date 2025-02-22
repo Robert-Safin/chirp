@@ -33,6 +33,8 @@ func main() {
 
 	mux.HandleFunc("DELETE /api/chirps/{id}", api.HandlerWithConfig(cfg, api.DeleteChirp))
 
+	mux.HandleFunc("POST /api/polka/webhooks", api.HandlerWithConfig(cfg, api.UpgradeUser))
+
 	server := http.Server{
 		Handler: mux,
 		Addr:    ":8080",
