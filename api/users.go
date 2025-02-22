@@ -185,3 +185,58 @@ func Revoke(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	RespondOK(w, 204, struct{}{})
 
 }
+
+func UpdateUser(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
+	type body struct {
+		Password string `json:"password"`
+		Email    string `json:"email"`
+	}
+	type response struct {
+		Id         uuid.UUID `json:"id"`
+		Created_at time.Time `json:"created_at"`
+		Updated_at time.Time `json:"updates_at"`
+		Email      string    `json:"email"`
+	}
+	h, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		RespondError(w, 401, "Not Authorized")
+		return
+	}
+
+	var params body
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&params)
+	if err != nil {
+		RespondError(w, 500, "Something went wrong")
+		return
+	}
+
+	user_id, err := auth.ValidateJWT(h, cfg.JwtSecret)
+	if err != nil {
+		RespondError(w, 401, "Not Authorized")
+		return
+	}
+
+	hashed_passowrd, err := auth.HashPassword(params.Password)
+	if err != nil {
+		RespondError(w, 500, "Something went wrong")
+		return
+	}
+
+	user, err := cfg.Db.UpdateUser(context.Background(), database.UpdateUserParams{
+		ID:             user_id,
+		Email:          params.Email,
+		HashedPassword: hashed_passowrd,
+	})
+	if err != nil {
+		RespondError(w, 500, "Something went wrong")
+		return
+	}
+
+	RespondOK(w, 200, response{
+		Id:         user.ID,
+		Created_at: user.CreatedAt,
+		Updated_at: user.UpdatedAt,
+		Email:      user.Email,
+	})
+}

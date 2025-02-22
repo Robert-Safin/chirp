@@ -146,3 +146,42 @@ func GetChirpById(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 		User_id:    uuid.UUID.String(chirp.UserID),
 	})
 }
+
+func DeleteChirp(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(r.PathValue("id"))
+
+	if err != nil {
+		RespondError(w, 401, "Not authorized")
+		return
+	}
+
+	h, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		RespondError(w, 401, "Not authorized")
+		return
+	}
+
+	token, err := auth.ValidateJWT(h, cfg.JwtSecret)
+	if err != nil {
+		RespondError(w, 401, "Not authorized")
+		return
+	}
+
+	chirp, err := cfg.Db.GetChirpByID(context.Background(), id)
+	if err != nil {
+		RespondError(w, 404, "Not found")
+		return
+	}
+
+	if chirp.UserID != token {
+		RespondError(w, 403, "Not authorized")
+		return
+	}
+
+	err = cfg.Db.DeleteChirpByID(context.Background(), id)
+	if err != nil {
+		RespondError(w, 500, "Something went wrong")
+		return
+	}
+	RespondOK(w, 204, struct{}{})
+}
