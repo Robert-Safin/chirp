@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"sort"
 	"strings"
 	"time"
 
@@ -85,7 +86,7 @@ func CreateChirp(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func GetAllChirps(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
+func GetChirps(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	type resChirp struct {
 		Id         uuid.UUID `json:"id"`
 		Created_at time.Time `json:"created_at"`
@@ -94,11 +95,35 @@ func GetAllChirps(cfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 		User_id    string    `json:"user_id"`
 	}
 
-	chirps, err := cfg.Db.GetAllChirps(context.Background())
+	var chirps []database.Chirp
 
-	if err != nil {
-		RespondError(w, 500, fmt.Sprintf("Error: %v", err))
-		return
+	query := r.URL.Query().Get("author_id")
+	sort_query := r.URL.Query().Get("sort")
+
+	if query == "" {
+		data, err := cfg.Db.GetAllChirps(context.Background())
+		if err != nil {
+			RespondError(w, 500, fmt.Sprintf("Error: %v", err))
+			return
+		}
+		chirps = data
+
+	} else {
+		uuid, err := uuid.Parse(query)
+		if err != nil {
+			RespondError(w, 400, fmt.Sprintf("Error: %v", err))
+			return
+		}
+		data, err := cfg.Db.GetChirpsByAuthorID(context.Background(), uuid)
+		if err != nil {
+			RespondError(w, 400, fmt.Sprintf("Error: %v", err))
+			return
+		}
+		chirps = data
+	}
+
+	if sort_query == "desc" {
+		sort.Slice(chirps, func(a, b int) bool { return chirps[b].CreatedAt.Before(chirps[a].CreatedAt) })
 	}
 
 	var resChirps []resChirp

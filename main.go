@@ -20,7 +20,7 @@ func main() {
 	mux.HandleFunc("POST /admin/reset", api.HandlerWithConfig(cfg, api.Reset))
 	mux.HandleFunc("POST /api/chirps", api.HandlerWithConfig(cfg, api.CreateChirp))
 	mux.HandleFunc("POST /api/users", api.HandlerWithConfig(cfg, api.CreateUser))
-	mux.HandleFunc("GET /api/chirps", api.HandlerWithConfig(cfg, api.GetAllChirps))
+	mux.HandleFunc("GET /api/chirps", api.HandlerWithConfig(cfg, api.GetChirps))
 	mux.HandleFunc("GET /api/chirps/{id}", api.HandlerWithConfig(cfg, api.GetChirpById))
 
 	mux.HandleFunc("POST /api/login", api.HandlerWithConfig(cfg, api.Login))
